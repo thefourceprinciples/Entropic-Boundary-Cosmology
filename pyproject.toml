@@ -1,0 +1,16 @@
+[project]
+name = "entropic-boundary-cosmology"
+version = "0.1.0"
+description = "Simulation scaffolds and manuscripts for Entropic Boundary Cosmology."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Gage Fry" }]
+keywords = ["emergent-time", "entropy", "simulation", "cosmology", "graphene", "crystal-growth"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["simulations/ebc-sim-001/tests"]
+pythonpath = ["simulations/ebc-sim-001/python"]
