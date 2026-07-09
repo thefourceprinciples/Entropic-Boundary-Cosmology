@@ -1,5 +1,7 @@
 # Entropic Boundary Cosmology
 
+[![EBC-SIM-001 Tests](https://github.com/thefourceprinciples/Entropic-Boundary-Cosmology/actions/workflows/ebc-sim-001-tests.yml/badge.svg)](https://github.com/thefourceprinciples/Entropic-Boundary-Cosmology/actions/workflows/ebc-sim-001-tests.yml)
+
 **Entropic Boundary Cosmology (EBC)** is a relational-time and simulation framework for modeling how internal clocks can emerge from entropy-producing exchange across boundaries between accessible and inaccessible sectors of a closed or effectively closed system.
 
 > The clock is born at the veil.
