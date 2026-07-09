@@ -1,0 +1,21 @@
+{
+  "artifact": "EBC-SIM-001",
+  "version": "0.1.0",
+  "model_type": "classical toy particle universe",
+  "claim_boundary": "Pedagogical EBC simulator; not a quantitative BEC or cosmology model.",
+  "default_controls": {
+    "barrier_opacity_kappa": 0.35,
+    "darkness_mode": "fertile",
+    "particles": 420,
+    "noise": 0.035
+  },
+  "core_metrics": [
+    "external_lambda",
+    "entropic_time_tau_E",
+    "boundary_flux_Phi_partial",
+    "entropic_lapse_N_E",
+    "coherence_C_B",
+    "fource",
+    "darkness_functional"
+  ]
+}
