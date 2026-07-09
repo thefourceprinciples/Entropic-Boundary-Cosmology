@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EBC-SIM-001 Bright/Dark Entropic Clock</title>
+<style>
+body{margin:0;background:#070912;color:#e8eefc;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}header{padding:22px 24px 8px}main{display:grid;grid-template-columns:300px 1fr 300px;gap:16px;padding:16px 24px}.panel{background:#111827;border:1px solid #253047;border-radius:14px;padding:14px}canvas{width:100%;height:620px;background:#050814;border:1px solid #253047;border-radius:14px}label{display:block;margin-top:12px;color:#c7d2ea}input,select,button{width:100%;margin-top:5px}button,select{background:#0b1020;color:#e8eefc;border:1px solid #33415f;border-radius:9px;padding:9px}.metric{display:flex;justify-content:space-between;border-bottom:1px solid #23304a;padding:6px 0}.muted{color:#9fb0cf;font-size:13px}@media(max-width:980px){main{grid-template-columns:1fr}canvas{height:480px}}
+</style>
+</head>
+<body>
+<header><h1>EBC-SIM-001 — Bright/Dark Entropic Clock</h1><p class="muted">Classical toy universe: bright sector, dark sector, tunable boundary, entropic time, Fource, and Darkness Functional.</p></header>
+<main>
+<section class="panel">
+<h2>Controls</h2>
+<label>Barrier opacity κ <span id="kv"></span></label><input id="k" type="range" min="0" max="1" step="0.01" value="0.35">
+<label>Darkness mode</label><select id="mode"><option>fertile</option><option>corrupting</option><option>sealed</option></select>
+<label>Particles <span id="nv"></span></label><input id="n" type="range" min="120" max="900" step="20" value="420">
+<label>Noise <span id="noisev"></span></label><input id="noise" type="range" min="0" max="0.12" step="0.005" value="0.035">
+<button id="reset">Reset</button><button id="pause">Pause</button>
+<p class="muted"><b>Claim boundary:</b> this is a conceptual toy model, not a quantitative BEC simulator.</p>
+</section>
+<section><canvas id="c" width="1000" height="620"></canvas></section>
+<section class="panel"><h2>Metrics</h2><div id="m"></div><p class="muted">Clock law: dτE/dλ = Φ∂/Φ0. Here Φ∂ is a boundary-crossing proxy.</p></section>
+</main>
+<script>
+const el=id=>document.getElementById(id), canvas=el('c'), ctx=canvas.getContext('2d');
+let ps=[],t=0,tau=0,running=true,ret=[]; const phi0=.05;
+function rndn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function reset(){ps=[];t=0;tau=0;ret=[];for(let i=0;i<+el('n').value;i++){let th=Math.random()*Math.PI*2;ps.push({x:Math.random(),y:Math.random(),vx:rndn()*.08,vy:rndn()*.08,th,mem:th})}}
+function step(){let k=+el('k').value,mode=el('mode').value,T=mode==='sealed'?0:Math.exp(-5*k),cross=0,sx=0,sy=0,nb=0;
+ for(const p of ps){let old=p.x>.5;p.x+=p.vx*.025;p.y+=p.vy*.025;if(p.x<0||p.x>1){p.vx*=-1;p.x=Math.max(0,Math.min(1,p.x))}if(p.y<0||p.y>1){p.vy*=-1;p.y=Math.max(0,Math.min(1,p.y))}p.th=(p.th+rndn()*(+el('noise').value))%(Math.PI*2);if(p.x<.5){sx+=Math.cos(p.th);sy+=Math.sin(p.th);nb++}if(Math.random()<.025*T){let wasDark=p.x>.5;p.x=wasDark?.48:.52;cross++;if(!wasDark){p.mem=p.th;if(mode==='corrupting')p.th=Math.random()*Math.PI*2}else{let sc=.5+.5*Math.cos(p.th-p.mem);if(mode==='corrupting')sc*=.35;ret.push(sc);if(ret.length>300)ret.shift()}}}
+ let flux=cross/ps.length,lapse=flux/phi0;tau+=lapse;t+=1;let coh=nb?Math.hypot(sx/nb,sy/nb):0,exchange=1-Math.exp(-flux/phi0),fource=coh*exchange*(k/(1+k)),df=ret.length?ret.reduce((a,b)=>a+b,0)/ret.length:0;
+ return {k,T,flux,lapse,coh,fource,df,bright:nb/ps.length}}
+function draw(s){let w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.fillStyle='#071126';ctx.fillRect(0,0,w/2,h);ctx.fillStyle='#100b1b';ctx.fillRect(w/2,0,w/2,h);ctx.fillStyle=`rgba(190,215,255,${.15+.7*s.k})`;ctx.fillRect(w/2-3,0,6,h);ctx.fillStyle='#dfe9ff';ctx.font='16px system-ui';ctx.fillText('BRIGHT / accessible',18,28);ctx.fillText('DARK / hidden',w/2+18,28);for(const p of ps){ctx.beginPath();ctx.arc(p.x*w,p.y*h,p.x<.5?2.4:2,0,Math.PI*2);ctx.fillStyle=p.x<.5?'#b9d5ff':'rgba(180,120,255,.45)';ctx.fill()}}
+function metrics(s){el('m').innerHTML=[['external λ',t],['entropic τE',tau.toFixed(2)],['lapse NE',s.lapse.toFixed(3)],['boundary flux',s.flux.toFixed(4)],['coherence CB',s.coh.toFixed(3)],['Fource ℱ',s.fource.toFixed(4)],['Darkness DF',s.df.toFixed(3)],['bright fraction',s.bright.toFixed(3)],['transmissivity',s.T.toFixed(3)]].map(x=>`<div class="metric"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}
+function loop(){el('kv').textContent=(+el('k').value).toFixed(2);el('nv').textContent=el('n').value;el('noisev').textContent=(+el('noise').value).toFixed(3);let s=running?step():{k:+el('k').value,T:0,flux:0,lapse:0,coh:0,fource:0,df:0,bright:0};draw(s);metrics(s);requestAnimationFrame(loop)}
+el('reset').onclick=reset;el('pause').onclick=()=>{running=!running;el('pause').textContent=running?'Pause':'Resume'};el('n').onchange=reset;reset();loop();
+</script>
+</body>
+</html>
